@@ -6,14 +6,18 @@ build-backend = "setuptools.build_meta"
 name = "neurokernel"
 version = "0.3.1"
 description = "An open architecture for Drosophila brain emulation"
-license = { text = "BSD" }
+license = "BSD-3-Clause" # TODO: figure out if this is the CORRECT variant of the license. Original license was "BSD" (not valid)
+license-files = [ "LICENSE.rst" ]
 authors = [{ name = "Neurokernel Development Team", email = "neurokernel-dev@columbia.edu" }]
-maintainers = [{ name = "Neurokernel Development Team", email = "neurokernel-dev@columbia.edu" }]
+# This is a forked version of original neurokernel/neurokernel. Bell & Paige are maintainers of Subarked/neurokernel
+maintainers = [
+  { name = "Neurokernel Development Team", email = "neurokernel-dev@columbia.edu" },
+  { name = "Bell & Paige"}
+]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: BSD License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Topic :: Scientific/Engineering",
