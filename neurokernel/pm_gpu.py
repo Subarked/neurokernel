@@ -145,7 +145,7 @@ class GPUPortMapper(PortMapper):
             Selected data.
         """
 
-        if not self.data.any():
+        if self.data is None or not self.data.any():
             raise ValueError('port mapper contains no data')
         assert len(np.shape(inds)) == 1
         assert issubclass(inds.dtype.type, numbers.Integral)
@@ -196,7 +196,7 @@ class GPUPortMapper(PortMapper):
             raise ValueError('index array must contain integers')
 
         # Allocate data array if it doesn't exist:
-        if not self.data.any():
+        if self.data is None or not self.data.any():
             self.data = gpuarray.empty(N, type(data))
         else:
             assert self.data.dtype == type(data)
@@ -241,7 +241,7 @@ class GPUPortMapper(PortMapper):
             data = gpuarray.to_gpu(data)
 
         # Allocate data array if it doesn't exist:
-        if not self.data.any():
+        if self.data is None or not self.data.any():
             self.data = gpuarray.empty(N, data.dtype)
         else:
             assert self.data.dtype == data.dtype
