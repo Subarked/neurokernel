@@ -36,7 +36,7 @@ class test_loggermixin(TestCase):
         self.lm.log_critical('abc')
 
         # All output to stdout is buffered within a single test before emission:
-        self.assertEquals(sys.stdout.getvalue().strip(),
+        self.assertEqual(sys.stdout.getvalue().strip(),
                           'log:DEBUG|abc\n'
                           'log:INFO|abc\n'
                           'log:WARNING|abc\n'
@@ -50,7 +50,7 @@ class test_loggermixin(TestCase):
         self.lm.log_warning('abc')
         self.lm.log_error('abc')
         self.lm.log_critical('abc')
-        self.assertEquals(sys.stdout.getvalue().strip(), '')
+        self.assertEqual(sys.stdout.getvalue().strip(), '')
 
 if __name__ == '__main__':
     main(buffer=True)
