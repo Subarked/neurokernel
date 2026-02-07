@@ -5,7 +5,7 @@ from unittest import main, TestCase
 import numpy as np
 import pandas as pd
 from numpy.testing import assert_array_equal
-from pandas.util.testing import assert_frame_equal, assert_index_equal, \
+from pandas.testing import assert_frame_equal, assert_index_equal, \
     assert_series_equal
 
 from neurokernel.pm import BasePortMapper, PortMapper
