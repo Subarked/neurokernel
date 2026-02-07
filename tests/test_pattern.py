@@ -58,7 +58,7 @@ class test_interface(TestCase):
         j = Interface('/bar,/baz,/qux')
         j['/*', 'interface'] = 0
         assert i.get_common_ports(0, j, 0, 'spike') == []
-        self.assertItemsEqual(i.get_common_ports(0, j, 0),
+        self.assertEqual(i.get_common_ports(0, j, 0),
                               [('bar',), ('baz',)])
 
         # Without type, multiple levels:
@@ -67,7 +67,7 @@ class test_interface(TestCase):
         j = Interface('/foo[3:9]')
         j['/*', 'interface'] = 0
         assert i.get_common_ports(0, j, 0, 'spike') == []
-        self.assertItemsEqual(i.get_common_ports(0, j, 0),
+        self.assertEqual(i.get_common_ports(0, j, 0),
                               [('foo', 3), ('foo', 4), ('foo', 5)])
 
         # With type, single level:
@@ -75,7 +75,7 @@ class test_interface(TestCase):
         i['/foo,/bar', 'interface', 'type'] = [0, 'spike']
         j = Interface('/bar,/baz,/qux')
         j['/bar,/baz', 'interface', 'type'] = [0, 'spike']
-        self.assertItemsEqual(i.get_common_ports(0, j, 0, 'spike'),
+        self.assertEqual(i.get_common_ports(0, j, 0, 'spike'),
                               [('bar',)])
         
         # With type, multiple levels:
@@ -83,7 +83,7 @@ class test_interface(TestCase):
         i['/foo[3,4]', 'interface', 'type'] = [0, 'spike']
         j = Interface('/foo[3:9]')
         j['/foo[3,4]', 'interface', 'type'] = [0, 'spike']
-        self.assertItemsEqual(i.get_common_ports(0, j, 0, 'spike'),
+        self.assertEqual(i.get_common_ports(0, j, 0, 'spike'),
                               [('foo', 3), ('foo', 4)])
 
 
@@ -94,7 +94,7 @@ class test_interface(TestCase):
         j = Interface('/bar,/baz')
         j['/*', 'interface'] = 0
         assert i.get_common_ports(0, j, 0, 'spike') == []
-        self.assertItemsEqual(i.get_common_ports(0, j, 0),
+        self.assertEqual(i.get_common_ports(0, j, 0),
                               [('bar',)])
 
         # Without type, more than one level:
@@ -103,7 +103,7 @@ class test_interface(TestCase):
         j = Interface('/foo[3:9]')
         j['/*', 'interface'] = 0
         assert i.get_common_ports(0, j, 0, 'spike') == []
-        self.assertItemsEqual(i.get_common_ports(0, j, 0),
+        self.assertEqual(i.get_common_ports(0, j, 0),
                               [('foo', 3), ('foo', 4), ('foo', 5)])
 
         # With type, some with only one level:
@@ -111,7 +111,7 @@ class test_interface(TestCase):
         i['/foo[3,4],/bar', 'interface', 'type'] = [0, 'spike']
         j = Interface('/bar,/baz,/qux')
         j['/bar,/baz', 'interface', 'type'] = [0, 'spike']
-        self.assertItemsEqual(i.get_common_ports(0, j, 0, 'spike'),
+        self.assertEqual(i.get_common_ports(0, j, 0, 'spike'),
                               [('bar',)])
 
         # With type, more than one level:
@@ -119,7 +119,7 @@ class test_interface(TestCase):
         i['/foo[3,4]', 'interface', 'type'] = [0, 'spike']
         j = Interface('/foo[3:9]')
         j['/foo[3,4]', 'interface', 'type'] = [0, 'spike']
-        self.assertItemsEqual(i.get_common_ports(0, j, 0, 'spike'),
+        self.assertEqual(i.get_common_ports(0, j, 0, 'spike'),
                               [('foo', 3), ('foo', 4)])
 
     def test_to_selectors(self):
@@ -233,7 +233,7 @@ class test_interface(TestCase):
 
     def test_from_df_multiindex_empty(self):
         idx = pd.MultiIndex(levels=[['a', 'b'], [0, 1]],
-                            labels=[[],[]])
+                            codes=[[],[]])
         data = None
         columns = ['interface', 'io', 'type']
         df = pd.DataFrame(data, index=idx, columns=columns)
@@ -312,7 +312,7 @@ class test_interface(TestCase):
         assert_frame_equal(i.in_ports(0).data, df)
 
         # Test returning result as list of tuples:
-        self.assertItemsEqual(i.in_ports(0, True), df.index.tolist())
+        self.assertEqual(i.in_ports(0, True), df.index.tolist())
 
         # Selector with single level:
         i = Interface('/[foo,bar]')
@@ -328,7 +328,7 @@ class test_interface(TestCase):
         assert_frame_equal(i.in_ports(0).data, df)
 
         # Test returning result as list of tuples:
-        self.assertItemsEqual(i.in_ports(0, True), df.index.tolist())
+        self.assertEqual(i.in_ports(0, True), df.index.tolist())
 
     def test_interface_ports(self):
         # Selector with multiple levels:
@@ -342,7 +342,7 @@ class test_interface(TestCase):
         assert_frame_equal(i.interface_ports(1).data, j.data)
 
         # Test returning result as list of tuples:
-        self.assertItemsEqual(i.interface_ports(1, True), j.data.index.tolist())
+        self.assertEqual(i.interface_ports(1, True), j.data.index.tolist())
 
         # Selector with single level:
         i = Interface('/[foo,bar,baz]')
@@ -355,7 +355,7 @@ class test_interface(TestCase):
         assert_frame_equal(i.interface_ports(1).data, j.data)
 
         # Test returning result as list of tuples:
-        self.assertItemsEqual(i.interface_ports(1, True), j.data.index.tolist())
+        self.assertEqual(i.interface_ports(1, True), j.data.index.tolist())
 
     def test_out_ports(self):
         # Selector with multiple levels:
@@ -372,7 +372,7 @@ class test_interface(TestCase):
         assert_frame_equal(i.out_ports(1).data, df)
 
         # Test returning result as list of tuples:
-        self.assertItemsEqual(i.out_ports(1, True), df.index.tolist())
+        self.assertEqual(i.out_ports(1, True), df.index.tolist())
 
         # Selector with single level:
         i = Interface('/[foo,bar]')
@@ -388,7 +388,7 @@ class test_interface(TestCase):
         assert_frame_equal(i.out_ports(1).data, df)
 
         # Test returning result as list of tuples:
-        self.assertItemsEqual(i.out_ports(1, True), df.index.tolist())
+        self.assertEqual(i.out_ports(1, True), df.index.tolist())
 
     def test_gpot_ports(self):
         i = Interface('/foo[0:6]')
@@ -404,7 +404,7 @@ class test_interface(TestCase):
         assert_frame_equal(i.gpot_ports(0).data, j.data)
 
         # Test returning result as list of tuples:
-        self.assertItemsEqual(i.gpot_ports(0, True),
+        self.assertEqual(i.gpot_ports(0, True),
                               j.data.index.tolist())
 
     def test_spike_ports(self):
@@ -421,7 +421,7 @@ class test_interface(TestCase):
         assert_frame_equal(i.spike_ports(0).data, j.data)
 
         # Test returning result as list of tuples:
-        self.assertItemsEqual(i.spike_ports(0, True),
+        self.assertEqual(i.spike_ports(0, True),
                               j.data.index.tolist())
         
     def test_port_select(self):
@@ -434,7 +434,7 @@ class test_interface(TestCase):
     def test_index(self):
         assert_index_equal(self.interface.index,
                            pd.MultiIndex(levels=[['foo'], [0, 1, 2]],
-                                         labels=[[0, 0, 0], [0, 1, 2]],
+                                         codes=[[0, 0, 0], [0, 1, 2]],
                                          names=[0, 1]))
 
     def test_interface_ids(self):
@@ -671,7 +671,7 @@ class test_pattern(TestCase):
         p['/xxx[0]', '/bbb[0]'] = 1
         p['/xxx[1]', '/bbb[1]'] = 1
         p['/xxx[2]', '/bbb[2]'] = 1
-        self.assertItemsEqual(p.src_idx(0, 1),
+        self.assertEqual(p.src_idx(0, 1),
                               [('aaa', 0),
                                ('aaa', 1),
                                ('aaa', 2)])
@@ -680,7 +680,7 @@ class test_pattern(TestCase):
         q['/aaa','/www'] = 1
         q['/aaa','/xxx'] = 1
         q['/bbb','/yyy'] = 1
-        self.assertItemsEqual(q.src_idx(0, 1),
+        self.assertEqual(q.src_idx(0, 1),
                               [('aaa',),
                                ('bbb',)])
 
@@ -692,14 +692,14 @@ class test_pattern(TestCase):
         p['/xxx[0]', '/bbb[0]'] = 1
         p['/xxx[1]', '/bbb[1]'] = 1
         p['/xxx[2]', '/bbb[2]'] = 1
-        self.assertItemsEqual(p.src_idx(0, 1, dest_ports='/yyy[0]'),
+        self.assertEqual(p.src_idx(0, 1, dest_ports='/yyy[0]'),
                               [('aaa', 0)])
 
         q = Pattern('/[aaa,bbb]', '/[www,xxx,yyy]')
         q['/aaa','/www'] = 1
         q['/aaa','/xxx'] = 1
         q['/bbb','/yyy'] = 1
-        self.assertItemsEqual(q.src_idx(0, 1, dest_ports='/[www,xxx]'),
+        self.assertEqual(q.src_idx(0, 1, dest_ports='/[www,xxx]'),
                               [('aaa',)])
 
     def test_src_idx_src_type(self):
@@ -712,9 +712,9 @@ class test_pattern(TestCase):
         p['/xxx[2]', '/bbb[2]'] = 1
         p.interface['/aaa[0:3]'] = [0, 'in', 'spike']
         p.interface['/yyy[0:3]'] = [1, 'out', 'spike']
-        self.assertItemsEqual(p.src_idx(0, 1, src_type='spike'), 
+        self.assertEqual(p.src_idx(0, 1, src_type='spike'),
                               [('aaa', 0)])
-        self.assertItemsEqual(p.src_idx(0, 1, src_type='gpot'), [])
+        self.assertEqual(p.src_idx(0, 1, src_type='gpot'), [])
 
         q = Pattern('/[aaa,bbb,ccc]', '/[www,xxx,yyy,zzz]')
         q['/aaa','/www'] = 1
@@ -723,9 +723,9 @@ class test_pattern(TestCase):
         q['/zzz','/ccc'] = 1
         q.interface['/aaa'] = [0, 'in', 'spike']
         q.interface['/[www,xxx]'] = [1, 'out', 'spike']
-        self.assertItemsEqual(q.src_idx(0, 1, src_type='spike'), 
+        self.assertEqual(q.src_idx(0, 1, src_type='spike'),
                               [('aaa',)])
-        self.assertItemsEqual(q.src_idx(0, 1, src_type='gpot'), [])
+        self.assertEqual(q.src_idx(0, 1, src_type='gpot'), [])
 
     def test_src_idx_dest_type(self):
         p = Pattern('/[aaa,bbb][0:3]', '/[xxx,yyy][0:3]')
@@ -737,9 +737,9 @@ class test_pattern(TestCase):
         p['/xxx[2]', '/bbb[2]'] = 1
         p.interface['/aaa[0:3]', 'type'] = 'spike'
         p.interface['/yyy[0:3]', 'type'] = 'spike'
-        self.assertItemsEqual(p.src_idx(0, 1, dest_type='spike'), 
+        self.assertEqual(p.src_idx(0, 1, dest_type='spike'),
                               [('aaa', 0)])
-        self.assertItemsEqual(p.src_idx(0, 1, dest_type='gpot'), [])
+        self.assertEqual(p.src_idx(0, 1, dest_type='gpot'), [])
 
         q = Pattern('/[aaa,bbb,ccc]', '/[www,xxx,yyy,zzz]')
         q['/aaa','/www'] = 1
@@ -748,9 +748,9 @@ class test_pattern(TestCase):
         q['/zzz','/ccc'] = 1
         q.interface['/aaa'] = [0, 'in', 'spike']
         q.interface['/[www,xxx]'] = [1, 'out', 'spike']
-        self.assertItemsEqual(q.src_idx(0, 1, dest_type='spike'), 
+        self.assertEqual(q.src_idx(0, 1, dest_type='spike'),
                               [('aaa',)])
-        self.assertItemsEqual(q.src_idx(0, 1, dest_type='gpot'), [])
+        self.assertEqual(q.src_idx(0, 1, dest_type='gpot'), [])
 
     def test_src_idx_duplicates(self):
         p = Pattern('/[aaa,bbb][0:3]', '/[xxx,yyy][0:3]')
@@ -760,9 +760,9 @@ class test_pattern(TestCase):
         p['/xxx[0]', '/bbb[0]'] = 1
         p['/xxx[0]', '/bbb[1]'] = 1
         p['/xxx[1]', '/bbb[2]'] = 1
-        self.assertItemsEqual(p.src_idx(0, 1, duplicates=True),
+        self.assertEqual(p.src_idx(0, 1, duplicates=True),
                               [('aaa', 0), ('aaa', 0), ('aaa', 0)])
-        self.assertItemsEqual(p.src_idx(1, 0, duplicates=True),
+        self.assertEqual(p.src_idx(1, 0, duplicates=True),
                               [('xxx', 0), ('xxx', 0), ('xxx', 1)])
 
     def test_dest_idx(self):
@@ -773,7 +773,7 @@ class test_pattern(TestCase):
         p['/xxx[0]', '/bbb[0]'] = 1
         p['/xxx[1]', '/bbb[1]'] = 1
         p['/xxx[2]', '/bbb[2]'] = 1
-        self.assertItemsEqual(p.dest_idx(0, 1),
+        self.assertEqual(p.dest_idx(0, 1),
                               [('yyy', 0),
                                ('yyy', 1),
                                ('yyy', 2)])
@@ -782,7 +782,7 @@ class test_pattern(TestCase):
         q['/aaa','/www'] = 1
         q['/aaa','/xxx'] = 1
         q['/bbb','/yyy'] = 1
-        self.assertItemsEqual(q.dest_idx(0, 1),
+        self.assertEqual(q.dest_idx(0, 1),
                               [('www',),
                                ('xxx',),
                                ('yyy',)])
@@ -795,7 +795,7 @@ class test_pattern(TestCase):
         p['/xxx[0]', '/bbb[0]'] = 1
         p['/xxx[1]', '/bbb[1]'] = 1
         p['/xxx[2]', '/bbb[2]'] = 1
-        self.assertItemsEqual(p.dest_idx(0, 1, src_ports='/aaa[0]'),
+        self.assertEqual(p.dest_idx(0, 1, src_ports='/aaa[0]'),
                               [('yyy', 0),
                                ('yyy', 1),
                                ('yyy', 2)])
@@ -804,7 +804,7 @@ class test_pattern(TestCase):
         q['/aaa','/www'] = 1
         q['/aaa','/xxx'] = 1
         q['/bbb','/yyy'] = 1
-        self.assertItemsEqual(q.dest_idx(0, 1, src_ports='/aaa'),
+        self.assertEqual(q.dest_idx(0, 1, src_ports='/aaa'),
                               [('www',),
                                ('xxx',)])
 
@@ -818,11 +818,11 @@ class test_pattern(TestCase):
         p['/xxx[2]', '/bbb[2]'] = 1
         p.interface['/aaa[0:3]'] = [0, 'in', 'spike']
         p.interface['/yyy[0:3]'] = [1, 'out', 'spike']
-        self.assertItemsEqual(p.dest_idx(0, 1, src_type='spike'), 
+        self.assertEqual(p.dest_idx(0, 1, src_type='spike'),
                               [('yyy', 0),
                                ('yyy', 1),
                                ('yyy', 2)])
-        self.assertItemsEqual(p.dest_idx(0, 1, src_type='gpot'), [])
+        self.assertEqual(p.dest_idx(0, 1, src_type='gpot'), [])
 
         q = Pattern('/[aaa,bbb,ccc]', '/[www,xxx,yyy,zzz]')
         q['/aaa','/www'] = 1
@@ -831,10 +831,10 @@ class test_pattern(TestCase):
         q['/zzz','/ccc'] = 1
         q.interface['/aaa'] = [0, 'in', 'spike']
         q.interface['/[www,xxx]'] = [1, 'out', 'spike']
-        self.assertItemsEqual(q.dest_idx(0, 1, src_type='spike'), 
+        self.assertEqual(q.dest_idx(0, 1, src_type='spike'),
                               [('www',),
                                ('xxx',)])
-        self.assertItemsEqual(q.dest_idx(0, 1, src_type='gpot'), [])
+        self.assertEqual(q.dest_idx(0, 1, src_type='gpot'), [])
 
     def test_dest_idx_dest_type(self):
         p = Pattern('/[aaa,bbb][0:3]', '/[xxx,yyy][0:3]')
@@ -846,11 +846,11 @@ class test_pattern(TestCase):
         p['/xxx[2]', '/bbb[2]'] = 1
         p.interface['/aaa[0:3]', 'type'] = 'spike'
         p.interface['/yyy[0:3]', 'type'] = 'spike'
-        self.assertItemsEqual(p.dest_idx(0, 1, dest_type='spike'), 
+        self.assertEqual(p.dest_idx(0, 1, dest_type='spike'),
                               [('yyy', 0),
                                ('yyy', 1),
                                ('yyy', 2)])
-        self.assertItemsEqual(p.dest_idx(0, 1, dest_type='gpot'), [])
+        self.assertEqual(p.dest_idx(0, 1, dest_type='gpot'), [])
 
         q = Pattern('/[aaa,bbb,ccc]', '/[www,xxx,yyy,zzz]')
         q['/aaa','/www'] = 1
@@ -859,10 +859,10 @@ class test_pattern(TestCase):
         q['/zzz','/ccc'] = 1
         q.interface['/aaa'] = [0, 'in', 'spike']
         q.interface['/[www,xxx]'] = [1, 'out', 'spike']
-        self.assertItemsEqual(q.dest_idx(0, 1, dest_type='spike'), 
+        self.assertEqual(q.dest_idx(0, 1, dest_type='spike'),
                               [('www',),
                                ('xxx',)])
-        self.assertItemsEqual(q.dest_idx(0, 1, dest_type='gpot'), [])
+        self.assertEqual(q.dest_idx(0, 1, dest_type='gpot'), [])
 
     def test_is_in_interfaces(self):
         # Selectors with multiple levels:
@@ -938,21 +938,21 @@ class test_pattern(TestCase):
 
     def test_split_multiindex(self):
         idx = pd.MultiIndex(levels=[['a'], ['b', 'c'], ['d', 'e'], [0, 1, 2]],
-                            labels=[[0, 0, 0, 0], [0, 0, 1, 1], [0, 1, 0, 1], [0, 1, 1, 2]])
+                            codes=[[0, 0, 0, 0], [0, 0, 1, 1], [0, 1, 0, 1], [0, 1, 1, 2]])
         idx0, idx1 = Pattern.split_multiindex(idx, slice(0, 2), slice(2, 4))
         assert_index_equal(idx0,
                            pd.MultiIndex(levels=[['a'], ['b', 'c']],
-                                         labels=[[0, 0, 0, 0], [0, 0, 1, 1]]))
+                                         codes=[[0, 0, 0, 0], [0, 0, 1, 1]]))
         assert_index_equal(idx1,
                            pd.MultiIndex(levels=[['d', 'e'], [0, 1, 2]],
-                                         labels=[[0, 1, 0, 1], [0, 1, 1, 2]]))
+                                         codes=[[0, 1, 0, 1], [0, 1, 1, 2]]))
 
         idx0, idx1 = Pattern.split_multiindex(idx, slice(0, 1), slice(1, 4))
         assert_index_equal(idx0,
                            pd.Index(['a', 'a', 'a', 'a']))
         assert_index_equal(idx1,
                            pd.MultiIndex(levels=[['b', 'c'], ['d', 'e'], [0, 1, 2]],
-                                         labels=[[0, 0, 1, 1], [0, 1, 0, 1],
+                                         codes=[[0, 0, 1, 1], [0, 1, 0, 1],
                                                  [0, 1, 1, 2]]))
 
     def test_from_concat(self):
@@ -966,7 +966,7 @@ class test_pattern(TestCase):
                                 data=1)
         df = pd.DataFrame(data=[1, 1],
                           index=pd.MultiIndex(levels=[['bar', 'foo'], ['baz', 'qux']],
-                                              labels=[[1, 0], [0, 1]],
+                                              codes=[[1, 0], [0, 1]],
                                               names=['from_0', 'to_0'], dtype=object),
                           columns=['conn'], dtype=object)
         assert_frame_equal(p.data, df)
@@ -977,7 +977,7 @@ class test_pattern(TestCase):
                                 data=1)
         df = pd.DataFrame(data=[1, 1],
                           index=pd.MultiIndex(levels=[['foo'], [0, 1], ['bar'], [0, 1]],
-                                              labels=[[0, 0], [0, 1], [0, 0], [0, 1]],
+                                              codes=[[0, 0], [0, 1], [0, 0], [0, 1]],
                                               names=['from_0', 'from_1', 'to_0', 'to_1'], 
                                               dtype=object),
                           columns=['conn'], dtype=object)
@@ -993,13 +993,13 @@ class test_pattern(TestCase):
                                'io': ['in', 'in', 'out', 'out'],
                                'type': ['gpot', 'spike', 'gpot', 'spike']},
                               index=pd.MultiIndex(levels=[['bar', 'foo'], [0, 1]],
-                                                  labels=[[1, 1, 0, 0], [0, 1, 0, 1]],
+                                                  codes=[[1, 1, 0, 0], [0, 1, 0, 1]],
                                                   names=[0, 1],
                                                   dtype=object),
                               dtype=object)
         df = pd.DataFrame(data=[1, 1],
                           index=pd.MultiIndex(levels=[['foo'], [0, 1], ['bar'], [0, 1]],
-                                              labels=[[0, 0], [0, 1], [0, 0], [0, 1]],
+                                              codes=[[0, 0], [0, 1], [0, 0], [0, 1]],
                                               names=['from_0', 'from_1', 'to_0', 'to_1'], 
                                               dtype=object),
                           columns=['conn'],
@@ -1017,13 +1017,13 @@ class test_pattern(TestCase):
                                     (1, 'out', np.nan),
                                     (1, 'out', np.nan)],
                 index=pd.MultiIndex(levels=[['aaa', 'bbb', 'ccc', 'ddd'], [0]], 
-                                    labels=[[0, 1, 2, 3], [0, 0, 0, 0]],
+                                    codes=[[0, 1, 2, 3], [0, 0, 0, 0]],
                                     names=[0, 1]),
                               columns=['interface', 'io', 'type'],
                               dtype=object)
         df_pat = pd.DataFrame(data=[(1,), (1,)],
                 index=pd.MultiIndex(levels=[['aaa'], [0], ['ccc', 'ddd'], [0]],
-                                    labels=[[0, 0], [0, 0], [0, 1], [0, 0]],
+                                    codes=[[0, 0], [0, 0], [0, 1], [0, 0]],
                                     names=['from_0', 'from_1', 'to_0', 'to_1']),
                               columns=['conn'],
                               dtype=object)
@@ -1035,7 +1035,7 @@ class test_pattern(TestCase):
         p = Pattern('/foo', '/bar')
         p['/foo', '/bar'] = 1
         g = p.to_graph()
-        self.assertItemsEqual(g.nodes(data=True),
+        self.assertEqual(g.nodes(data=True),
                               [('/foo', {'interface': 0, 'io': 'in', 'type': ''}),
                                ('/bar', {'interface': 1, 'io': 'out', 'type': ''})])
 
@@ -1047,7 +1047,7 @@ class test_pattern(TestCase):
         p['/bar[3]', '/foo[3]'] = 1
         g = p.to_graph()
 
-        self.assertItemsEqual(g.nodes(data=True), 
+        self.assertEqual(g.nodes(data=True),
                               [('/bar/0', {'interface': 1, 'io': 'out', 'type': ''}),
                                ('/bar/1', {'interface': 1, 'io': 'out', 'type': ''}),
                                ('/bar/2', {'interface': 1, 'io': 'out', 'type': ''}),
@@ -1056,7 +1056,7 @@ class test_pattern(TestCase):
                                ('/foo/1', {'interface': 0, 'io': 'in', 'type': ''}),
                                ('/foo/2', {'interface': 0, 'io': 'out', 'type': ''}),
                                ('/foo/3', {'interface': 0, 'io': 'out', 'type': ''})])
-        self.assertItemsEqual(g.edges(data=True),
+        self.assertEqual(g.edges(data=True),
                               [('/foo/0', '/bar/0', {}),
                                ('/foo/0', '/bar/1', {}),
                                ('/foo/1', '/bar/2', {}),
@@ -1073,7 +1073,7 @@ class test_pattern(TestCase):
         p.interface['/foo[3]','type'] = 'spike'
         g = p.to_graph()
 
-        self.assertItemsEqual(g.nodes(data=True), 
+        self.assertEqual(g.nodes(data=True),
                               [('/bar/0', {'interface': 1, 'io': 'out', 'type': 'gpot'}),
                                ('/bar/1', {'interface': 1, 'io': 'out', 'type': 'gpot'}),
                                ('/bar/2', {'interface': 1, 'io': 'out', 'type': 'gpot'}),
@@ -1147,10 +1147,10 @@ class test_pattern(TestCase):
         p.interface['/foo[1:3]', 'io', 'type'] = ['out', 'gpot']
         p.interface['/bar[0:2]', 'io', 'type'] = ['out', 'spike']
         p.interface['/bar[2]', 'io', 'type'] = ['in', 'gpot']
-        self.assertItemsEqual(p.gpot_ports(0).to_tuples(),
+        self.assertEqual(p.gpot_ports(0).to_tuples(),
                               [('foo', 1),
                                ('foo', 2)])
-        self.assertItemsEqual(p.gpot_ports(1).to_tuples(),
+        self.assertEqual(p.gpot_ports(1).to_tuples(),
                               [('bar', 2)])
 
     def test_in_ports(self):
@@ -1159,9 +1159,9 @@ class test_pattern(TestCase):
         p.interface['/foo[1:3]', 'io', 'type'] = ['out', 'gpot']
         p.interface['/bar[0:2]', 'io', 'type'] = ['out', 'spike']
         p.interface['/bar[2]', 'io', 'type'] = ['in', 'gpot']
-        self.assertItemsEqual(p.in_ports(0).to_tuples(),
+        self.assertEqual(p.in_ports(0).to_tuples(),
                               [('foo', 0)])
-        self.assertItemsEqual(p.in_ports(1).to_tuples(),
+        self.assertEqual(p.in_ports(1).to_tuples(),
                               [('bar', 2)])
 
     def test_interface_ports(self):
@@ -1170,11 +1170,11 @@ class test_pattern(TestCase):
         p.interface['/foo[1:3]', 'io', 'type'] = ['out', 'gpot']
         p.interface['/bar[0:2]', 'io', 'type'] = ['out', 'spike']
         p.interface['/bar[2]', 'io', 'type'] = ['in', 'gpot']
-        self.assertItemsEqual(p.interface_ports(0).to_tuples(),
+        self.assertEqual(p.interface_ports(0).to_tuples(),
                               [('foo', 0),
                                ('foo', 1),
                                ('foo', 2)])
-        self.assertItemsEqual(p.interface_ports(1).to_tuples(),
+        self.assertEqual(p.interface_ports(1).to_tuples(),
                               [('bar', 0),
                                ('bar', 1),
                                ('bar', 2)])
@@ -1183,15 +1183,15 @@ class test_pattern(TestCase):
         p = Pattern('/foo[0:3]', '/bar[0:3]')
         p['/foo[0]', '/bar[0]'] = 1
         p['/foo[1]', '/bar[1]'] = 1
-        self.assertItemsEqual(p.connected_ports(tuples=True),
+        self.assertEqual(p.connected_ports(tuples=True),
                               [('bar', 0),
                                ('bar', 1),
                                ('foo', 0),
                                ('foo', 1)])
-        self.assertItemsEqual(p.connected_ports(0, True),
+        self.assertEqual(p.connected_ports(0, True),
                               [('foo', 0),
                                ('foo', 1)])
-        self.assertItemsEqual(p.connected_ports(1, True),
+        self.assertEqual(p.connected_ports(1, True),
                               [('bar', 0),
                                ('bar', 1)])
 
@@ -1201,10 +1201,10 @@ class test_pattern(TestCase):
         p.interface['/foo[1:3]', 'io', 'type'] = ['out', 'gpot']
         p.interface['/bar[0:2]', 'io', 'type'] = ['out', 'spike']
         p.interface['/bar[2]', 'io', 'type'] = ['in', 'gpot']
-        self.assertItemsEqual(p.out_ports(0).to_tuples(),
+        self.assertEqual(p.out_ports(0).to_tuples(),
                               [('foo', 1),
                                ('foo', 2)])
-        self.assertItemsEqual(p.out_ports(1).to_tuples(),
+        self.assertEqual(p.out_ports(1).to_tuples(),
                               [('bar', 0),
                                ('bar', 1)])
 
@@ -1224,7 +1224,7 @@ class test_pattern(TestCase):
         p['/aaa[2]', '/bbb[2]'] = 1
         df = pd.DataFrame({'conn': [1]},
             index=pd.MultiIndex(levels=[['aaa'], [0, 1, 2], ['bbb'], [0, 1, 2]],
-                                labels=[[0], [0], [0], [0]],
+                                codes=[[0], [0], [0], [0]],
                                 names=['from_0', 'from_1', 'to_0', 'to_1']),
                           dtype=object)
         assert_frame_equal(p[[('aaa', 0)], [('bbb', 0)]], df)

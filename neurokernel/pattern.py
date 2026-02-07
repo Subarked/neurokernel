@@ -828,10 +828,10 @@ class Interface(object):
 
         assert callable(f)
         if inplace:
-            self.data = self.data.select(f)
+            self.data = self.data.loc[self.index.map(f)]
             return self
         else:
-            return Interface.from_df(self.data.select(f))
+            return Interface.from_df(self.data.loc[self.index.map(f)])
 
     def spike_ports(self, i=None, tuples=False):
         """
@@ -1585,7 +1585,7 @@ class Pattern(object):
 
         # Otherwise, populate a new DataFrame with the specified attributes:
         else:
-            new_data = self.data.append(pd.DataFrame(data=data, index=idx,
+            new_data = self.data._append(pd.DataFrame(data=data, index=idx,
                                                      dtype=object))
 
             # Validate updated DataFrame's index before updating the instance's
