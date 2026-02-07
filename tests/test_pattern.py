@@ -5,7 +5,7 @@ from unittest import main, TestCase
 import numpy as np
 import pandas as pd
 import networkx as nx
-from pandas.util.testing import assert_frame_equal, assert_index_equal, \
+from pandas.testing import assert_frame_equal, assert_index_equal, \
     assert_series_equal
 
 from neurokernel.pattern import Interface, Pattern, are_compatible

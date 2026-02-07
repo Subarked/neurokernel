@@ -7,7 +7,7 @@ from numpy.testing import assert_array_equal
 import pycuda.autoinit
 import pycuda.gpuarray as gpuarray
 
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 
 from neurokernel.pm_gpu import PortMapper, GPUPortMapper
 
