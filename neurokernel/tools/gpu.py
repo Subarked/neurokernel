@@ -12,8 +12,14 @@ from pycuda.tools import dtype_to_ctype
 # XXX This try/except is an ugly hack to prevent the doc build on
 # ReadTheDocs from failing:
 try:
-    num_types = [np.typeDict[t] for t in \
-                 np.typecodes['AllInteger']+np.typecodes['AllFloat']]
+    # np.typeDict was deprecated, so now we use
+    # np.sctypeDict, which requires us to convert from abbreviated
+    # to full name
+    num_types = []
+    for type_abbreviated_char in np.typecodes['AllInteger'] + np.typecodes['AllFloat']:
+        full_type_name = str(np.dtype(type_abbreviated_char + '_'))
+        num_types.append(np.sctypeDict[full_type_name])
+
 except TypeError:
     num_types = []
 
