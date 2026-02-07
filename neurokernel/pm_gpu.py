@@ -122,10 +122,10 @@ class GPUPortMapper(PortMapper):
     def set(self, selector, data):
 #        import ipdb; ipdb.set_trace()
         self.set_by_inds(np.asarray(self.sel.select(self.portmap,
-                        selector).dropna().values, dtype=np.int), data)
+                        selector).dropna().values, dtype=int), data)
 
     def get(self, selector):
-        return self.get_by_inds(np.asarray(self.sel.select(self.portmap, selector).dropna().values, dtype=np.int))
+        return self.get_by_inds(np.asarray(self.sel.select(self.portmap, selector).dropna().values, dtype=int))
 
     __getitem__ = get
     __setitem__ = set
