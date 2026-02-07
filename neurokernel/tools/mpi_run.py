@@ -88,14 +88,6 @@ def mpi_run(func, targets=None, delete_tempfile=True, log=False,
     main_code += "\n      print(e)"
     main_code += "\n"
 
-    print("TARGET_TEXT-----")
-    print(target_text)
-    print("FUNC_TEXT-----")
-    print(func_text)
-    print("MAIN_CODE-----")
-    print(main_code)
-    print("END-----")
-
     try:
         from mpi4py import MPI
         #Write code for the function to a temp file
@@ -126,6 +118,7 @@ def mpi_run(func, targets=None, delete_tempfile=True, log=False,
 
     except Exception as e:
         l.log_error(str(e))
+        print(str(e))
         raise
 
     finally:
@@ -189,7 +182,6 @@ def mpi_run_manager(man, steps, targets=None, delete_tempfile=True, log=False,
     func_code += "\n    import dill"
     func_code += "\n    f = open(\"%s\",\"rb\")"
     func_code += "\n    man = dill.load(f)"
-    func_code += "\n    print(\"got to here\")"
     func_code += "\n    man.spawn()"
     func_code += "\n    man.start(steps=%i)"
     func_code += "\n    man.wait()"
