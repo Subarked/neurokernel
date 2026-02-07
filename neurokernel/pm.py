@@ -181,7 +181,7 @@ class BasePortMapper(object):
         """
 
         return self.sel.select(self.portmap,
-                    selector).dropna().astype(np.int_).values
+                    selector).dropna().astype(int_).values
 
     def get_map(self, selector):
         """
@@ -432,7 +432,7 @@ class PortMapper(BasePortMapper):
 
         if self.data is None:
             raise ValueError('port mapper contains no data')
-        return self.data[np.asarray(self.sel.select(self.portmap, selector).dropna().values, dtype=np.int)]
+        return self.data[np.asarray(self.sel.select(self.portmap, selector).dropna().values, dtype=int)]
 
     def get_by_inds(self, inds):
         """
@@ -550,7 +550,7 @@ class PortMapper(BasePortMapper):
         if self.data is None:
             self.data = data
         else:
-            self.data[np.asarray(self.sel.select(self.portmap, selector).dropna().values, dtype=np.int)] = data
+            self.data[np.asarray(self.sel.select(self.portmap, selector).dropna().values, dtype=int)] = data
 
     def set_by_inds(self, inds, data):
         """
