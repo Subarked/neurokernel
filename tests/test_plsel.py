@@ -378,7 +378,7 @@ class test_path_like_selector(TestCase):
         idx = self.sel.get_index(self.df, '/foo/mof/*')
         assert_index_equal(idx, pd.MultiIndex(levels=[['foo'], ['mof'],
                                                       [0, 1, 2]],
-                                              labels=[[0, 0, 0],
+                                              codes=[[0, 0, 0],
                                                       [0, 0, 0],
                                                       [0, 1, 2]]))
 
@@ -386,7 +386,7 @@ class test_path_like_selector(TestCase):
         idx = self.sel.get_index(self.df, [['foo', 'mof', '*']])
         assert_index_equal(idx, pd.MultiIndex(levels=[['foo'], ['mof'],
                                                       [0, 1, 2]],
-                                              labels=[[0, 0, 0],
+                                              codes=[[0, 0, 0],
                                                       [0, 0, 0],
                                                       [0, 1, 2]]))
 
@@ -550,22 +550,22 @@ class test_path_like_selector(TestCase):
 
     def test_make_index_empty(self):
         idx = self.sel.make_index('')
-        assert_index_equal(idx, pd.MultiIndex(levels=[[]], labels=[[]], names=[0]))
+        assert_index_equal(idx, pd.MultiIndex(levels=[[]], codes=[[]], names=[0]))
 
         idx = self.sel.make_index(Selector(''))
-        assert_index_equal(idx, pd.MultiIndex(levels=[[]], labels=[[]], names=[0]))
+        assert_index_equal(idx, pd.MultiIndex(levels=[[]], codes=[[]], names=[0]))
 
     def test_make_index_str_single_level(self):
         idx = self.sel.make_index('/foo')
-        assert_index_equal(idx, pd.MultiIndex([['foo']], labels=[[0]], names=[0]))
+        assert_index_equal(idx, pd.MultiIndex([['foo']], codes=[[0]], names=[0]))
         idx = self.sel.make_index('/foo,/bar')
-        assert_index_equal(idx, pd.MultiIndex([['foo', 'bar']], labels=[[0,1]], names=[0]))
+        assert_index_equal(idx, pd.MultiIndex([['foo', 'bar']], codes=[[0,1]], names=[0]))
 
     def test_make_index_str_multiple_levels(self):
         idx = self.sel.make_index('/[foo,bar]/[0:3]')
         assert_index_equal(idx, pd.MultiIndex(levels=[['bar', 'foo'],
                                                       [0, 1, 2]],
-                                              labels=[[1, 1, 1, 0, 0, 0],
+                                              codes=[[1, 1, 1, 0, 0, 0],
                                                       [0, 1, 2, 0, 1, 2]],
                                               names=[0, 1]))
 
@@ -573,21 +573,21 @@ class test_path_like_selector(TestCase):
         idx = self.sel.make_index('/foo[0:3],/bar')
         assert_index_equal(idx, pd.MultiIndex(levels=[['bar', 'foo'],
                                                       [0, 1, 2, '']],
-                                              labels=[[1, 1, 1, 0],
+                                              codes=[[1, 1, 1, 0],
                                                       [0, 1, 2, 3]],
                                               names=[0, 1]))
 
     def test_make_index_list_single_level(self):
         idx = self.sel.make_index([['foo']])
-        assert_index_equal(idx, pd.MultiIndex([['foo']], labels=[[0]], names=[0]))
+        assert_index_equal(idx, pd.MultiIndex([['foo']], codes=[[0]], names=[0]))
         idx = self.sel.make_index([['foo'], ['bar']])
-        assert_index_equal(idx, pd.MultiIndex([['foo', 'bar']], labels=[[0,1]], names=[0]))
+        assert_index_equal(idx, pd.MultiIndex([['foo', 'bar']], codes=[[0,1]], names=[0]))
 
     def test_make_index_list_multiple_levels(self):
         idx = self.sel.make_index([[['foo', 'bar'], slice(0, 3)]])
         assert_index_equal(idx, pd.MultiIndex(levels=[['bar', 'foo'],
                                                       [0, 1, 2]],
-                                              labels=[[1, 1, 1, 0, 0, 0],
+                                              codes=[[1, 1, 1, 0, 0, 0],
                                                       [0, 1, 2, 0, 1, 2]],
                                               names=[0, 1]))
 
@@ -595,7 +595,7 @@ class test_path_like_selector(TestCase):
         idx = self.sel.make_index([['foo', [0, 1, 2]], ['bar']])
         assert_index_equal(idx, pd.MultiIndex(levels=[['bar', 'foo'],
                                                       [0, 1, 2, '']],
-                                              labels=[[1, 1, 1, 0],
+                                              codes=[[1, 1, 1, 0],
                                                       [0, 1, 2, 3]],
                                               names=[0, 1]))
 
