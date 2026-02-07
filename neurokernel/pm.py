@@ -181,7 +181,7 @@ class BasePortMapper(object):
         """
 
         return self.sel.select(self.portmap,
-                    selector).dropna().astype(int_).values
+                    selector).dropna().astype(int).values
 
     def get_map(self, selector):
         """

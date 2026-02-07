@@ -16,7 +16,7 @@ class test_base_port_mapper(TestCase):
         pm = BasePortMapper('/foo[0:5]', portmap)
         s = pd.Series(np.arange(5),
                       pd.MultiIndex(levels=[['foo'], [0, 1, 2, 3, 4]],
-                                    labels=[[0, 0, 0, 0, 0],
+                                    codes=[[0, 0, 0, 0, 0],
                                             [0, 1, 2, 3, 4]],
                                     names=[0, 1]))
         assert_series_equal(pm.portmap, s)
@@ -76,7 +76,7 @@ class test_base_port_mapper(TestCase):
         # port mapper doesn't have the side effect of altering the created
         # mapper:
         index = pd.MultiIndex(levels=[[u'foo'], [0, 1, 2, 3, 4]],
-                              labels=[[0, 0, 0, 0, 0], [0, 1, 2, 3, 4]],
+                              codes=[[0, 0, 0, 0, 0], [0, 1, 2, 3, 4]],
                               names=[0, 1])
         portmap = np.arange(5)
         pm1 = BasePortMapper.from_index(index, portmap)
@@ -101,14 +101,14 @@ class test_base_port_mapper(TestCase):
 
         # Nonexistent ports should return an empty index array:
         i = pm.ports_to_inds('/baz')
-        assert len(i) == 0 and i.dtype == np.int_
+        assert len(i) == 0 and i.dtype == int
 
         # With a specified port map:
         pm = BasePortMapper('/foo[0:5],/bar[0:5]', list(range(10, 20)))
         np.allclose(pm.ports_to_inds('/foo[4],/bar[0]'), [14, 15])
 
         i = pm.ports_to_inds('/baz')
-        assert len(i) == 0 and i.dtype == np.int_
+        assert len(i) == 0 and i.dtype == int
 
     def test_get_map(self):
         # Try to get selector that is in the mapper:
@@ -134,7 +134,7 @@ class test_port_mapper(TestCase):
         # indexes with dtype=object):
         pm = PortMapper('')
         assert_series_equal(pm.portmap,
-            pd.Series([], dtype=np.int_, index=pd.MultiIndex(levels=[[]], labels=[[]], names=[0])))
+            pd.Series([], dtype=int, index=pd.MultiIndex(levels=[[]], codes=[[]], names=[0])))
         assert_array_equal(pm.data, np.array([]))
 
 
@@ -143,7 +143,7 @@ class test_port_mapper(TestCase):
         assert_series_equal(pm.portmap,
                             pd.Series(np.arange(3),
                                       pd.MultiIndex(levels=[['foo'], [0, 1, 2]],
-                                                    labels=[[0, 0, 0], [0, 1, 2]],
+                                                    codes=[[0, 0, 0], [0, 1, 2]],
                                                     names=[0, 1])))
         assert_array_equal(pm.data, np.array([]))
 
@@ -157,7 +157,7 @@ class test_port_mapper(TestCase):
         assert_array_equal(pm.data, data)
         s = pd.Series(np.arange(5),
                       pd.MultiIndex(levels=[['foo'], [0, 1, 2, 3, 4]],
-                                    labels=[[0, 0, 0, 0, 0],
+                                    codes=[[0, 0, 0, 0, 0],
                                             [0, 1, 2, 3, 4]],
                                     names=[0, 1]))
         assert_series_equal(pm.portmap, s)
