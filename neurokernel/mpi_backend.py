@@ -64,11 +64,12 @@ rank = MPI.COMM_WORLD.Get_rank()
 parent = MPI.Comm.Get_parent()
 
 # Get emitters transmitted from spawning process:
-emitters = parent.recv()
+# emitters = parent.recv() <- DONT FORGET TO UNCOMMENT THIS when blow block of code is uncommented. Also uncomment sending message in mpi_proc.py spawn function
 
 # If any of the emitters contain MPIOutput instances, they need to be replaced
 # by newly initialized instances so that they write to valid file handles and
 # use the intercommunicator to the parent process:
+""" TODO: Fix this entire block of code. the logging system may need to be repaired in the future. iteritems does not work on tuples, which emitters is.
 for k, v in iteritems(emitters):
     if isinstance(v._output, neurokernel.tools.mpi.MPIOutput):
         level = v.min_level
@@ -84,6 +85,7 @@ for k, v in iteritems(emitters):
                                             MPI.COMM_WORLD, mode, False)))
     else:
         twiggy.emitters[k] = v
+"""
 
 # Get the routing table:
 routing_table =  parent.bcast(None, root=0)
