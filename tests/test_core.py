@@ -2,7 +2,7 @@
 
 import neurokernel.mpi_relaunch
 
-import cPickle as pickle
+import pickle
 import os
 import tempfile
 
