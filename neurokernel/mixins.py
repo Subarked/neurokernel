@@ -58,6 +58,34 @@ class LoggerMixin(object):
             self.log_error = lambda x: None
             self.log_critical = lambda x: None
 
+class FakeLoggerMixin(object):
+    """
+    Mixin that can be used in place of LoggerMixin for cases where
+    using twiggy is currently broken.
+    """
+    def __init__(self, name="FakeLogger", log_on=True):
+        self.log_on=log_on
+
+    @property
+    def log_on(self):
+        return self._log_on
+
+    @log_on.setter
+    def log_on(self, value):
+        self._log_on = bool(value)
+        if self._log_on:
+            self.log_debug = print
+            self.log_info = print
+            self.log_warning = print
+            self.log_error = print
+            self.log_critical = print
+        else:
+            self.log_debug = lambda x: None
+            self.log_info = lambda x: None
+            self.log_warning = lambda x: None
+            self.log_error = lambda x: None
+            self.log_critical = lambda x: None
+
 if __name__ == '__main__':
     import sys
     output = twiggy.outputs.StreamOutput(twiggy.formats.line_format,

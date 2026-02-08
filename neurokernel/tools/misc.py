@@ -139,18 +139,16 @@ def catch_exception(func, disp, debug, *args, **kwargs):
         Named function arguments.
 
     """
-
     try:
         func(*args, **kwargs)
     except Exception as e:
-
         # Find the line number of the innermost traceback frame:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         # error = traceback.format_exception(exc_type, exc_value,
         #                                    exc_traceback)
         for fname in traceback.extract_tb(exc_traceback):
             fname, lineno, fn, text = fname
-        disp(func.__name__ + ': ' + e.__class__.__name__ + ': ' + str(e) + \
+        disp and disp(func.__name__ + ': ' + e.__class__.__name__ + ': ' + str(e) + \
            ' (' + fname + ':' + str(lineno) + ')')
         if debug:
             traceback.print_exception(exc_type, exc_value, exc_traceback,

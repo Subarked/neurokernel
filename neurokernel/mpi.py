@@ -16,7 +16,7 @@ mpi4py.rc.finalize = False
 from mpi4py import MPI
 
 from neurokernel.mpi_proc import getargnames, Process, ProcessManager
-from neurokernel.mixins import LoggerMixin
+from neurokernel.mixins import LoggerMixin, FakeLoggerMixin
 from neurokernel.tools.logging import setup_logger, set_excepthook
 from neurokernel.tools.misc import memoized_property, catch_exception
 
@@ -45,6 +45,7 @@ class Worker(Process):
         # Execution step counter:
         self.steps = 0
         self.error = False
+        self.debug = None
 
     # Define properties to perform validation when the maximum number of
     # execution steps set:
@@ -59,8 +60,8 @@ class Worker(Process):
     def max_steps(self, value):
         if value < 0:
             raise ValueError('invalid maximum number of steps')
-        #self.log_info('maximum number of steps changed: %s -> %s' % \
-        #              (self._max_steps, value))
+        print('maximum number of steps changed: %s -> %s' % \
+                      (self._max_steps, value))
         self._max_steps = value
 
     def do_work(self):
@@ -71,8 +72,7 @@ class Worker(Process):
         instance receives a 'start' control message and until it receives a 'stop'
         control message. It should be overridden by child classes.
         """
-
-        #self.log_info('executing do_work')
+        pass
 
     def progressbar_name(self):
         return 'worker'
@@ -84,7 +84,8 @@ class Worker(Process):
         This method is invoked by the `run()` method before the main loop is
         started.
         """
-        #self.log_info('running code before body of worker %s' % self.rank)
+
+        print('running code before body of worker %s' % self.rank)
         self.post_run_complete = False
 
     def post_run(self):
@@ -99,28 +100,26 @@ class Worker(Process):
     def _finalize(self):
         if not self.post_run_complete:
             self.pbar.close() # it should've already been closed in `run` but just to make sure.
-            #self.log_info('running code after body of worker %s' % self.rank)
+            print('running code after body of worker %s' % self.rank)
 
             if self.manager:
                 # Send acknowledgment message:
                 self.intercomm.isend(['done', self.rank], 0, self._ctrl_tag)
-                #self.log_info('done message sent to manager')
+                print('done message sent to manager')
             self.post_run_complete = True
 
     def catch_exception_run(self, func, *args, **kwargs):
         # If the debug flag is set, don't catch exceptions so that
         # errors will lead to visible failures:
-
+        error = catch_exception(func, FakeLoggerMixin(), self.debug, *args, **kwargs)
         if self.manager:
-            #error = catch_exception(func, self.log_info, self.debug, *args, **kwargs)
             if error is not None:
                 if not self.error:
                     self.intercomm.isend(['error', (self.id, self.steps, error)],
                                          dest=0, tag=self._ctrl_tag)
-                    #self.log_info('error sent to manager')
+                    print('error sent to manager')
                     self.error = True
         else:
-            #error = catch_exception(func, self.log_info, True, *args, **kwargs)
             pass
 
     def run(self, steps = 0):
@@ -132,7 +131,7 @@ class Worker(Process):
         self.catch_exception_run(self.pre_run)
         self.pbar = tqdm(desc = self.progressbar_name(), position = self.rank)
 
-        #self.log_info('running body of worker %s' % self.rank)
+        print('running body of worker %s' % self.rank)
 
         # Start listening for control messages from parent process:
         if self.manager:
@@ -161,16 +160,16 @@ class Worker(Process):
 
                     # Start executing work method:
                     if msg[0] == 'start':
-                        #self.log_info('starting')
+                        print('starting')
                         running = True
 
                     # Stop executing work method::
                     elif msg[0] == 'stop':
                         if self.max_steps == float('inf'):
-                            #self.log_info('stopping')
+                            print('stopping')
                             running = False
                         else:
-                            #self.log_info('max steps set - not stopping')
+                            print('max steps set - not stopping')
                             pass
 
                     # Set maximum number of execution steps:
@@ -180,15 +179,15 @@ class Worker(Process):
                         else:
                             self.max_steps = int(msg[1])
                         self.pbar.total = self.max_steps
-                        #self.log_info('setting maximum steps to %s' % self.max_steps)
+                        print('setting maximum steps to %s' % self.max_steps)
 
                     # Quit:
                     elif msg[0] == 'quit':
                         # if self.max_steps == float('inf'):
-                        #self.log_info('quitting')
+                        print('quitting')
                         break
                         # else:
-                        #     #self.log_info('max steps set - not quitting')
+                        #     print('max steps set - not quitting')
 
                     # Get next message:
                     r_ctrl = []
@@ -207,12 +206,12 @@ class Worker(Process):
                 self.do_work()
                 self.steps += 1
                 self.pbar.update()
-                #self.log_info('execution step: %s' % self.steps)
+                #print('execution step: %s' % self.steps)
 
             # Leave loop if maximum number of steps has been reached:
             if self.steps >= self.max_steps:
                 running = False
-                #self.log_info('maximum steps reached')
+                print('maximum steps reached')
                 break
 
         #self.post_run()
@@ -271,21 +270,21 @@ class WorkerManager(ProcessManager):
         """
 
         assert issubclass(target, Worker)
-        #self.log_info('adding class %s' % target.__name__)
+        print('adding class %s' % target.__name__)
         return ProcessManager.add(self, target, *args, **kwargs)
 
     def process_worker_msg(self, msg):
         """
         Process the specified deserialized message from a worker.
         """
-        #self.log_info('got ctrl msg: %s' % str(msg))
+        print('got ctrl msg: %s' % str(msg))
 
     def wait(self):
         """
         Wait for execution to complete.
         """
 
-        #self.log_info('MANAGER wait')
+        print('MANAGER wait')
 
         # Start listening for control messages:
         r_ctrl = []
@@ -293,8 +292,6 @@ class WorkerManager(ProcessManager):
             d = self.intercomm.irecv(source=MPI.ANY_SOURCE,
                                      tag=self._ctrl_tag)
         except TypeError:
-            #self.log_warning('MANAGER using dest instead of source in intercomm.irecv')
-            # irecv() in mpi4py 1.3.1 stable uses 'dest' instead of 'source':
             d = self.intercomm.irecv(dest=MPI.ANY_SOURCE,
                                      tag=self._ctrl_tag)
         r_ctrl.append(d)
@@ -305,10 +302,11 @@ class WorkerManager(ProcessManager):
             flag, msg_list = req.testall(r_ctrl)
             if flag:
                 msg = msg_list[0]
-                #self.log_info('MANAGER received message \'%s\'' % msg)
+                print('MANAGER received message \'%s\'' % msg)
                 if msg[0] == 'done':
-                    #self.log_info('removing %s from worker list' % msg[1])
+                    print('removing %s from worker list' % msg[1])
                     workers.remove(msg[1])
+                    print('removed')
 
                 # Additional control messages from the workers are processed
                 # here:
@@ -327,41 +325,41 @@ class WorkerManager(ProcessManager):
                 r_ctrl.append(d)
 
             if not workers:
-                #self.log_info('finished running manager')
+                print('finished running manager')
                 break
 
     def start(self, steps=float('inf')):
         """
         Tell the workers to start processing data.
         """
-        #self.log_info('MANAGER start')
-        #self.log_info('sending steps message (%s)' % steps)
+        print('MANAGER start')
+        print('sending steps message (%s)' % steps)
         for dest in range(len(self)):
-            #self.log_info('MANAGER --steps--> %d' % dest)
+            print('MANAGER --steps--> %d' % dest)
             self.intercomm.isend(['steps', str(steps)], dest, self._ctrl_tag)
-        #self.log_info('sending start message')
+        print('sending start message')
         for dest in range(len(self)):
-            #self.log_info('MANAGER --start--> %d' % dest)
+            print('MANAGER --start--> %d' % dest)
             self.intercomm.isend(['start'], dest, self._ctrl_tag)
 
     def stop(self):
         """
         Tell the workers to stop processing data.
         """
-        #self.log_info('MANAGER stop')
-        #self.log_info('sending stop message')
+        print('MANAGER stop')
+        print('sending stop message')
         for dest in range(len(self)):
-            #self.log_info('MANAGER --stop--> %d' % dest)
+            print('MANAGER --stop--> %d' % dest)
             self.intercomm.isend(['stop'], dest, self._ctrl_tag)
 
     def quit(self):
         """
         Tell the workers to quit.
         """
-        #self.log_info('MANAGER quit')
-        #self.log_info('sending quit message')
+        print('MANAGER quit')
+        print('sending quit message')
         for dest in range(len(self)):
-            #self.log_info('MANAGER --quit--> %d' % dest)
+            print('MANAGER --quit--> %d' % dest)
             self.intercomm.isend(['quit'], dest, self._ctrl_tag)
 
 if __name__ == '__main__':
@@ -381,9 +379,9 @@ if __name__ == '__main__':
         def __init__(self, x, y, z=None, routing_table=None):
             super(MyWorker, self).__init__()
             name = MPI.Get_processor_name()
-            #self.log_info('I am process %d of %d on %s.' % (self.rank,
-            #                                               self.size, name))
-            #self.log_info('init args: %s, %s, %s' % (x, y, z))
+            print('I am process %d of %d on %s.' % (self.rank,
+                                                           self.size, name))
+            print('init args: %s, %s, %s' % (x, y, z))
 
     print("Instanciating")
     man = WorkerManager()
