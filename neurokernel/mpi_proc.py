@@ -292,8 +292,9 @@ class ProcessManager(LoggerMixin):
             # First, transmit twiggy logging emitters to spawned processes so
             # that they can configure their logging facilities:
             for i in self._targets:
-                print("MANAGER --logginginformation--> %s" % i)
-                self._intercomm.send(twiggy.emitters, i)
+                pass
+                # print("MANAGER --logginginformation--> %s" % i) TODO: Find a replacement for this.
+                # ._intercomm.send(twiggy.emitters, i)                  twiggy.emitters is not serializeable
 
             # Next, serialize the routing table ONCE and then transmit it to all
             # of the child nodes:
