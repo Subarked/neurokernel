@@ -114,11 +114,10 @@ def mpi_run(func, targets=None, delete_tempfile=True, log=False,
                 del env_copy[k]
 
         l.log_info("Calling: " + " ".join(command))
-        out = subprocess.check_output(command, env = env_copy)
+        out = subprocess.check_output(command, env = env_copy, timeout=5)
 
     except Exception as e:
         l.log_error(str(e))
-        print(str(e))
         raise
 
     finally:
@@ -182,7 +181,9 @@ def mpi_run_manager(man, steps, targets=None, delete_tempfile=True, log=False,
     func_code += "\n    import dill"
     func_code += "\n    f = open(\"%s\",\"rb\")"
     func_code += "\n    man = dill.load(f)"
+    func_code += "\n    print(\"test1\")"
     func_code += "\n    man.spawn()"
+    func_code += "\n    print(\"test2\")"
     func_code += "\n    man.start(steps=%i)"
     func_code += "\n    man.wait()"
 

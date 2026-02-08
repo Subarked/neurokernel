@@ -36,7 +36,7 @@ MPIEXEC_EXTRA_OPTS = []
 # Get name of the file in which this module is imported:
 script_name = inspect.stack()[-1][1]
 parent_name = psutil.Process(os.getppid()).name()
-if not re.search('mpirun|mpiexec', parent_name):
+if not re.search('mpirun|mpiexec|prte(d)?', parent_name):
 
     # Retry without redirection if an IOError occurs, e.g., in an IPython
     # notebook because the overriden iostreams don't have a file
