@@ -302,7 +302,7 @@ class ProcessManager(LoggerMixin):
                 routing_table = self.routing_table
             except:
                 routing_table = RoutingTable()
-                self.log_warning('Routing Table is null, using empty routing table.')
+                #self.log_warning('Routing Table is null, using empty routing table.')
 
             self._intercomm.bcast(routing_table, root=MPI.ROOT)
 
@@ -348,10 +348,10 @@ if __name__ == '__main__':
     class MyProcess(Process):
         def __init__(self, *args, **kwargs):
             super(MyProcess, self).__init__(*args, **kwargs)
-            self.log_info('I am process %d of %d on %s.' % \
-                          (MPI.COMM_WORLD.Get_rank(),
-                           MPI.COMM_WORLD.Get_size(),
-                           MPI.COMM_WORLD.Get_name()))
+            #self.log_info('I am process %d of %d on %s.' % \
+            #              (MPI.COMM_WORLD.Get_rank(),
+            #               MPI.COMM_WORLD.Get_size(),
+            #               MPI.COMM_WORLD.Get_name()))
 
     from tools.logging import setup_logger
 
