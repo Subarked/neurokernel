@@ -15,10 +15,10 @@ mpi4py.rc.initialize = False
 mpi4py.rc.finalize = False
 from mpi4py import MPI
 
-from .mpi_proc import getargnames, Process, ProcessManager
-from .mixins import LoggerMixin
-from .tools.logging import setup_logger, set_excepthook
-from .tools.misc import memoized_property, catch_exception
+from neurokernel.mpi_proc import getargnames, Process, ProcessManager
+from neurokernel.mixins import LoggerMixin
+from neurokernel.tools.logging import setup_logger, set_excepthook
+from neurokernel.tools.misc import memoized_property, catch_exception
 
 from tqdm import tqdm
 
@@ -276,7 +276,6 @@ class WorkerManager(ProcessManager):
         """
         Process the specified deserialized message from a worker.
         """
-
         self.log_info('got ctrl msg: %s' % str(msg))
 
     def wait(self):
@@ -284,12 +283,15 @@ class WorkerManager(ProcessManager):
         Wait for execution to complete.
         """
 
+        self.log_info('MANAGER wait')
+
         # Start listening for control messages:
         r_ctrl = []
         try:
             d = self.intercomm.irecv(source=MPI.ANY_SOURCE,
                                      tag=self._ctrl_tag)
         except TypeError:
+            self.log_warning('MANAGER using dest instead of source in intercomm.irecv')
             # irecv() in mpi4py 1.3.1 stable uses 'dest' instead of 'source':
             d = self.intercomm.irecv(dest=MPI.ANY_SOURCE,
                                      tag=self._ctrl_tag)
@@ -301,6 +303,7 @@ class WorkerManager(ProcessManager):
             flag, msg_list = req.testall(r_ctrl)
             if flag:
                 msg = msg_list[0]
+                self.log_info('MANAGER received message \'%s\'' % msg)
                 if msg[0] == 'done':
                     self.log_info('removing %s from worker list' % msg[1])
                     workers.remove(msg[1])
@@ -329,41 +332,49 @@ class WorkerManager(ProcessManager):
         """
         Tell the workers to start processing data.
         """
-
+        self.log_info('MANAGER start')
         self.log_info('sending steps message (%s)' % steps)
         for dest in range(len(self)):
+            self.log_info('MANAGER --steps--> %d' % dest)
             self.intercomm.isend(['steps', str(steps)], dest, self._ctrl_tag)
         self.log_info('sending start message')
         for dest in range(len(self)):
+            self.log_info('MANAGER --start--> %d' % dest)
             self.intercomm.isend(['start'], dest, self._ctrl_tag)
 
     def stop(self):
         """
         Tell the workers to stop processing data.
         """
-
+        self.log_info('MANAGER stop')
         self.log_info('sending stop message')
         for dest in range(len(self)):
+            self.log_info('MANAGER --stop--> %d' % dest)
             self.intercomm.isend(['stop'], dest, self._ctrl_tag)
 
     def quit(self):
         """
         Tell the workers to quit.
         """
-
+        self.log_info('MANAGER quit')
         self.log_info('sending quit message')
         for dest in range(len(self)):
+            self.log_info('MANAGER --quit--> %d' % dest)
             self.intercomm.isend(['quit'], dest, self._ctrl_tag)
 
 if __name__ == '__main__':
+    print("Its fork time baby")
     import neurokernel.mpi_relaunch
+    print("NEVER RUN")
     import time
-
+    MPI.Init()
+    print("setting up logger")
     setup_logger(screen=True, file_name='neurokernel.log',
             mpi_comm=MPI.COMM_WORLD, multiline=True)
 
     # Define a class whose constructor takes arguments so as to test
     # instantiation of the class by the manager:
+    print("defining MyWorker")
     class MyWorker(Worker):
         def __init__(self, x, y, z=None, routing_table=None):
             super(MyWorker, self).__init__()
@@ -372,13 +383,17 @@ if __name__ == '__main__':
                                                             self.size, name))
             self.log_info('init args: %s, %s, %s' % (x, y, z))
 
+    print("Instanciating")
     man = WorkerManager()
+    print("Adding workers")
     man.add(target=MyWorker, x=1, y=2, z=3)
     man.add(MyWorker, 3, 4, 5)
     man.add(MyWorker, 6, 7, 8)
+    print("Spawning")
     man.spawn()
-
+    print("Spawned")
     # To run for a specific number of steps, run
     # man.start(number_of_steps)
     man.start(100)
+    print("Started")
     man.wait()

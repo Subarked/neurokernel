@@ -262,14 +262,18 @@ class ProcessManager(LoggerMixin):
         """
 
         # Typcially MPI must be have intialized before spawning.
+        print("MANAGER spawn")
         if not MPI.Is_initialized():
             MPI.Init()
 
         if self._is_parent:
             # Find the path to the mpi_backend.py script (which should be in the
             # same directory as this module:
+            print("MANAGER is parent")
             parent_dir = os.path.dirname(__file__)
+            print("MANAGER spawning backend")
             mpi_backend_path = os.path.join(parent_dir, 'mpi_backend.py')
+            print("MANAGER spawned backend")
 
             # Set spawn option. Due to --oversubscribe, we will use none in binding
             info = Info.Create()
@@ -278,6 +282,7 @@ class ProcessManager(LoggerMixin):
             for k, v in kwargs.items():
                 info.Set(k, v)
 
+            print("MANAGER spawning processes")
             # Spawn processes:
             self._intercomm = MPI.COMM_SELF.Spawn(sys.executable,
                                             args=[mpi_backend_path],
@@ -287,6 +292,7 @@ class ProcessManager(LoggerMixin):
             # First, transmit twiggy logging emitters to spawned processes so
             # that they can configure their logging facilities:
             for i in self._targets:
+                print("MANAGER --logginginformation--> %s" % i)
                 self._intercomm.send(twiggy.emitters, i)
 
             # Next, serialize the routing table ONCE and then transmit it to all
@@ -302,9 +308,11 @@ class ProcessManager(LoggerMixin):
             # Transmit class to instantiate, globals required by the class, and
             # the constructor arguments; the backend will wait to receive
             # them and then start running the targets on the appropriate nodes.
+            print("MANAGER transmitting instantiate, globals, and constructor args")
             req = MPI.Request()
             r_list = []
             for i in self._targets:
+                print("MANAGER --target_globals-> %s" % i)
                 target_globals = all_global_vars(self._targets[i])
 
                 # Serializing atexit with dill appears to fail in virtualenvs

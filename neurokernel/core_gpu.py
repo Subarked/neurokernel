@@ -737,6 +737,7 @@ class Manager(mpi.WorkerManager):
         """
 
         return self._average_step_sync_time
+
     @average_step_sync_time.setter
     def average_step_sync_time(self, t):
         self._average_step_sync_time = t
@@ -759,6 +760,7 @@ class Manager(mpi.WorkerManager):
         """
 
         return self._average_throughput
+
     @average_throughput.setter
     def average_throughput(self, t):
         self._average_throughput = t

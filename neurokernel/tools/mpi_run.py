@@ -114,9 +114,12 @@ def mpi_run(func, targets=None, delete_tempfile=True, log=False,
                 del env_copy[k]
 
         l.log_info("Calling: " + " ".join(command))
-        out = subprocess.check_output(command, env = env_copy, timeout=5)
+        out = subprocess.run(command, env = env_copy, capture_output=True, timeout=5).stdout
+        print(str(out))
 
     except Exception as e:
+        print("printing error")
+        print(e.stdout)
         l.log_error(str(e))
         raise
 
