@@ -286,43 +286,25 @@ class WorkerManager(ProcessManager):
 
         print('MANAGER wait')
 
-        # Start listening for control messages:
-        r_ctrl = []
-        try:
-            d = self.intercomm.irecv(source=MPI.ANY_SOURCE,
-                                     tag=self._ctrl_tag)
-        except TypeError:
-            d = self.intercomm.irecv(dest=MPI.ANY_SOURCE,
-                                     tag=self._ctrl_tag)
-        r_ctrl.append(d)
+        # Start listening for control messages
         workers = list(range(len(self)))
         req = MPI.Request()
         while True:
             # Check for control messages from workers:
-            flag, msg_list = req.testall(r_ctrl)
-            if flag:
-                msg = msg_list[0]
-                print('MANAGER received message \'%s\'' % msg)
-                if msg[0] == 'done':
-                    print('removing %s from worker list' % msg[1])
-                    workers.remove(msg[1])
-                    print('removed')
+            print(">> GETTING BLOCKING REQUEST")
+            msg_list = self.intercomm.recv(dest=MPI.ANY_SOURCE, tag=self._ctrl_tag)
+            print(">> PROCESSING MESSAGE")
+            msg = msg_list[0]
+            print('MANAGER received message \'%s\'' % msg)
+            if msg[0] == 'done':
+                print('removing %s from worker list' % msg[1])
+                workers.remove(msg[1])
+                print('removed')
 
-                # Additional control messages from the workers are processed
-                # here:
-                else:
-                    self.process_worker_msg(msg)
-
-                # Get new control messages:
-                r_ctrl = []
-                try:
-                    d = self.intercomm.irecv(source=MPI.ANY_SOURCE,
-                                             tag=self._ctrl_tag)
-                except TypeError:
-                    # irecv() in mpi4py 1.3.1 stable uses 'dest' instead of 'source':
-                    d = self.intercomm.irecv(dest=MPI.ANY_SOURCE,
-                                             tag=self._ctrl_tag)
-                r_ctrl.append(d)
+            # Additional control messages from the workers are processed
+            # here:
+            else:
+                self.process_worker_msg(msg)
 
             if not workers:
                 print('finished running manager')
