@@ -78,7 +78,7 @@ class MyModule2(Module):
 
     def post_run(self):
         if self.out_file_name:
-            with open(self.out_file_name, 'w') as f:
+            with open(self.out_file_name, 'wb') as f:
                 pickle.dump(self.out_buf[1], f)
         super(MyModule2, self).post_run()
 
@@ -163,7 +163,7 @@ class test_core_gpu(TestCase):
         self.man.wait()
 
         # Get output of m2:
-        with open(out_file_name, 'r') as f:
+        with open(out_file_name, 'rb') as f:
             output = pickle.load(f)
 
         os.remove(out_file_name)
@@ -228,7 +228,7 @@ class test_core_gpu(TestCase):
         self.man.wait()
 
         # Get output of m2:
-        with open(out_file_name, 'r') as f:
+        with open(out_file_name, 'rb') as f:
             output = pickle.load(f)
 
         os.remove(out_file_name)

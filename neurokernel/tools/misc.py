@@ -141,20 +141,26 @@ def catch_exception(func, disp, debug, *args, **kwargs):
     """
     try:
         func(*args, **kwargs)
+        return
     except Exception as e:
+        print(e)
         # Find the line number of the innermost traceback frame:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         # error = traceback.format_exception(exc_type, exc_value,
         #                                    exc_traceback)
         for fname in traceback.extract_tb(exc_traceback):
             fname, lineno, fn, text = fname
-        disp and disp(func.__name__ + ': ' + e.__class__.__name__ + ': ' + str(e) + \
-           ' (' + fname + ':' + str(lineno) + ')')
+        if disp is not None:
+            disp(func.__name__ + ': ' + e.__class__.__name__ + ': ' + str(e) + \
+                 ' (' + fname + ':' + str(lineno) + ')')
         if debug:
             traceback.print_exception(exc_type, exc_value, exc_traceback,
                                       file=sys.stderr)
+            print('Debug flag was set, catch_exception will forward the exception.')
             raise e
-        return traceback.format_exception(exc_type, exc_value, exc_traceback)
+        trace = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        print('\n'.join(trace))
+        return trace
 
 def memoized_property(fget):
     """

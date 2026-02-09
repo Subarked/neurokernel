@@ -509,7 +509,6 @@ class Module(mpi.Worker):
         This method is invoked by the `run()` method after the main loop is
         started.
         """
-
         self.log_info('running code after body of worker %s' % self.rank)
 
         # Stop timing the main loop before shutting down the emulation:
@@ -532,14 +531,12 @@ class Module(mpi.Worker):
         output port data if necessary. It should not interact with any other
         class attributes.
         """
-
         self.log_info('running execution step')
 
     def run(self):
         """
         Body of process.
         """
-
         # Don't allow keyboard interruption of process:
         with IgnoreKeyboardInterrupt():
 
@@ -565,12 +562,12 @@ class Module(mpi.Worker):
             # Synchronize:
             self._sync()
         else:
-
             # Run the processing step:
-            catch_exception(self.run_step, self.log_info)
+            catch_exception(self.run_step, self.log_info, self.debug)
 
             # Synchronize:
-            catch_exception(self._sync, self.log_info)
+            catch_exception(self._sync, self.log_info, self.debug)
+
 
 class Manager(mpi.WorkerManager):
     """

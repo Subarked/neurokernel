@@ -46,6 +46,7 @@ class Worker(Process):
         self.steps = 0
         self.error = False
         self.debug = None
+        self.post_run_complete = False # not always set in pre_run
 
     # Define properties to perform validation when the maximum number of
     # execution steps set:
@@ -95,13 +96,13 @@ class Worker(Process):
         This method is invoked by the `run()` method after the main loop is
         started.
         """
+
         self._finalize()
 
     def _finalize(self):
         if not self.post_run_complete:
             self.pbar.close() # it should've already been closed in `run` but just to make sure.
             print('running code after body of worker %s' % self.rank)
-
             if self.manager:
                 # Send acknowledgment message:
                 self.intercomm.send(['done', self.rank], 0, self._ctrl_tag)
@@ -111,7 +112,7 @@ class Worker(Process):
     def catch_exception_run(self, func, *args, **kwargs):
         # If the debug flag is set, don't catch exceptions so that
         # errors will lead to visible failures:
-        error = catch_exception(func, FakeLoggerMixin(), self.debug, *args, **kwargs)
+        error = catch_exception(func, None, self.debug, *args, **kwargs)
         if self.manager:
             if error is not None:
                 if not self.error:
@@ -168,7 +169,6 @@ class Worker(Process):
                 flag, msg_list = request.test()
                 if not flag:
                     continue
-                print("worker got a message: %s" % str(msg_list))
                 # Start executing work method:
                 if msg_list[0]== 'start':
                     print('starting')
@@ -200,10 +200,11 @@ class Worker(Process):
                     # else:
                     #     print('max steps set - not quitting')
 
-        #self.post_run()
+        # self.post_run()
         self.catch_exception_run(self.post_run)
         if not self.post_run_complete:
             self._finalize()
+
 
 class WorkerManager(ProcessManager):
     """
@@ -269,30 +270,26 @@ class WorkerManager(ProcessManager):
         """
         Wait for execution to complete.
         """
-
-        print('MANAGER wait')
-
         # Start listening for control messages
-        num_active_workers = len(self)
+        active_workers = list(range(len(self))) # keep a list of active workers in case a worker re-sends a done message
         req = MPI.Request()
         while True:
             # Check for control messages from workers:
-            print(">> GETTING BLOCKING REQUEST")
             msg_list = self.intercomm.recv(source=MPI.ANY_SOURCE, tag=self._ctrl_tag)
-            print(">> PROCESSING MESSAGE")
             print('MANAGER received message \'%s\'' % msg_list[0])
             if msg_list[0] == 'done':
                 print('removing %s from worker list' % msg_list[1])
-                num_active_workers -= 1
-                print("NUM_WORKERS = %d" % num_active_workers)
-                print('removed')
+                if not msg_list[1] in active_workers:
+                    print('worker %s sent a duplicate \'done\' request. This is a bug!' % msg_list[1])
+                else:
+                    active_workers.remove(msg_list[1])
 
             # Additional control messages from the workers are processed
             # here:
             else:
                 self.process_worker_msg(msg_list[0])
 
-            if num_active_workers == 0:
+            if not active_workers:
                 print('finished running manager')
                 break
 
@@ -331,18 +328,14 @@ class WorkerManager(ProcessManager):
             self.intercomm.isend(['quit'], dest, self._ctrl_tag)
 
 if __name__ == '__main__':
-    print("Its fork time baby")
     import neurokernel.mpi_relaunch
-    print("NEVER RUN")
     import time
     MPI.Init()
-    print("setting up logger")
     #setup_logger(screen=True, file_name='neurokernel.log',
     #        mpi_comm=MPI.COMM_WORLD, multiline=True)
 
     # Define a class whose constructor takes arguments so as to test
     # instantiation of the class by the manager:
-    print("defining MyWorker")
     class MyWorker(Worker):
         def __init__(self, x, y, z=None, routing_table=None):
             super(MyWorker, self).__init__()
@@ -351,17 +344,12 @@ if __name__ == '__main__':
                                                            self.size, name))
             print('init args: %s, %s, %s' % (x, y, z))
 
-    print("Instanciating")
     man = WorkerManager()
-    print("Adding workers")
     man.add(target=MyWorker, x=1, y=2, z=3)
     man.add(MyWorker, 3, 4, 5)
     man.add(MyWorker, 6, 7, 8)
-    print("Spawning")
     man.spawn()
-    print("Spawned")
     # To run for a specific number of steps, run
     # man.start(number_of_steps)
     man.start(100)
-    print("Started")
     man.wait()
