@@ -134,16 +134,7 @@ class Worker(Process):
         print('running body of worker %s' % self.rank)
 
         # Start listening for control messages from parent process:
-        if self.manager:
-            r_ctrl = []
-            try:
-                d = self.intercomm.irecv(source=0, tag=self._ctrl_tag)
-            except TypeError:
-                # irecv() in mpi4py 1.3.1 stable uses 'dest' instead of 'source':
-                d = self.intercomm.irecv(dest=0, tag=self._ctrl_tag)
-            r_ctrl.append(d)
-            req = MPI.Request()
-
+        request = MPI.REQUEST_NULL # REQUEST_NULL gets refreshed in the loop automatically
         running = False
         self.steps = 0
         if not self.manager:
@@ -151,53 +142,6 @@ class Worker(Process):
             self.pbar.total = self.max_steps
             running = True
         while True:
-            if self.manager:
-                # Handle control messages (this assumes that only one control
-                # message will arrive at a time):
-                flag, msg_list = req.testall(r_ctrl)
-                if flag:
-                    msg = msg_list[0]
-
-                    # Start executing work method:
-                    if msg[0] == 'start':
-                        print('starting')
-                        running = True
-
-                    # Stop executing work method::
-                    elif msg[0] == 'stop':
-                        if self.max_steps == float('inf'):
-                            print('stopping')
-                            running = False
-                        else:
-                            print('max steps set - not stopping')
-                            pass
-
-                    # Set maximum number of execution steps:
-                    elif msg[0] == 'steps':
-                        if msg[1] == 'inf':
-                            self.max_steps = float('inf')
-                        else:
-                            self.max_steps = int(msg[1])
-                        self.pbar.total = self.max_steps
-                        print('setting maximum steps to %s' % self.max_steps)
-
-                    # Quit:
-                    elif msg[0] == 'quit':
-                        # if self.max_steps == float('inf'):
-                        print('quitting')
-                        break
-                        # else:
-                        #     print('max steps set - not quitting')
-
-                    # Get next message:
-                    r_ctrl = []
-                    try:
-                        d = self.intercomm.irecv(source=0, tag=self._ctrl_tag)
-                    except TypeError:
-                        # irecv() in mpi4py 1.3.1 stable uses 'dest' instead of 'source':
-                        d = self.intercomm.irecv(dest=0, tag=self._ctrl_tag)
-                    r_ctrl.append(d)
-
             # Execute work method; the work method may send data back to the master
             # as a serialized control message containing two elements, e.g.,
             # self.intercomm.isend(['foo', str(self.rank)],
@@ -213,6 +157,48 @@ class Worker(Process):
                 running = False
                 print('maximum steps reached')
                 break
+
+            if self.manager:
+                # Handle control messages (this assumes that only one control
+                # message will arrive at a time):
+                # refresh our request if its null
+                if request == MPI.REQUEST_NULL:
+                    request = self.intercomm.irecv(source=0, tag=self._ctrl_tag)
+                # check if we have an incoming message, and continue to message logic if yes
+                flag, msg_list = request.test()
+                if not flag:
+                    continue
+                print("worker got a message: %s" % str(msg_list))
+                # Start executing work method:
+                if msg_list[0]== 'start':
+                    print('starting')
+                    running = True
+
+                # Stop executing work method::
+                elif msg_list[0] == 'stop':
+                    if self.max_steps == float('inf'):
+                        print('stopping')
+                        running = False
+                    else:
+                        print('max steps set - not stopping')
+                        pass
+
+                # Set maximum number of execution steps:
+                elif msg_list[0] == 'steps':
+                    if msg_list[1] == 'inf':
+                        self.max_steps = float('inf')
+                    else:
+                        self.max_steps = int(msg_list[1])
+                    self.pbar.total = self.max_steps
+                    print('setting maximum steps to %s' % self.max_steps)
+
+                # Quit:
+                elif msg_list[0] == 'quit':
+                    # if self.max_steps == float('inf'):
+                    print('quitting')
+                    break
+                    # else:
+                    #     print('max steps set - not quitting')
 
         #self.post_run()
         self.catch_exception_run(self.post_run)
@@ -294,9 +280,8 @@ class WorkerManager(ProcessManager):
             print(">> GETTING BLOCKING REQUEST")
             msg_list = self.intercomm.recv(source=MPI.ANY_SOURCE, tag=self._ctrl_tag)
             print(">> PROCESSING MESSAGE")
-            msg = msg_list[0]
-            print('MANAGER received message \'%s\'' % msg)
-            if msg == 'done':
+            print('MANAGER received message \'%s\'' % msg_list[0])
+            if msg_list[0] == 'done':
                 print('removing %s from worker list' % msg_list[1])
                 num_active_workers -= 1
                 print("NUM_WORKERS = %d" % num_active_workers)
@@ -305,7 +290,7 @@ class WorkerManager(ProcessManager):
             # Additional control messages from the workers are processed
             # here:
             else:
-                self.process_worker_msg(msg)
+                self.process_worker_msg(msg_list[0])
 
             if num_active_workers == 0:
                 print('finished running manager')
