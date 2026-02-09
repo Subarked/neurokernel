@@ -104,7 +104,7 @@ class Worker(Process):
 
             if self.manager:
                 # Send acknowledgment message:
-                self.intercomm.isend(['done', self.rank], 0, self._ctrl_tag)
+                self.intercomm.send(['done', self.rank], 0, self._ctrl_tag)
                 print('done message sent to manager')
             self.post_run_complete = True
 
@@ -287,18 +287,19 @@ class WorkerManager(ProcessManager):
         print('MANAGER wait')
 
         # Start listening for control messages
-        workers = list(range(len(self)))
+        num_active_workers = len(self)
         req = MPI.Request()
         while True:
             # Check for control messages from workers:
             print(">> GETTING BLOCKING REQUEST")
-            msg_list = self.intercomm.recv(dest=MPI.ANY_SOURCE, tag=self._ctrl_tag)
+            msg_list = self.intercomm.recv(source=MPI.ANY_SOURCE, tag=self._ctrl_tag)
             print(">> PROCESSING MESSAGE")
             msg = msg_list[0]
             print('MANAGER received message \'%s\'' % msg)
-            if msg[0] == 'done':
-                print('removing %s from worker list' % msg[1])
-                workers.remove(msg[1])
+            if msg == 'done':
+                print('removing %s from worker list' % msg_list[1])
+                num_active_workers -= 1
+                print("NUM_WORKERS = %d" % num_active_workers)
                 print('removed')
 
             # Additional control messages from the workers are processed
@@ -306,7 +307,7 @@ class WorkerManager(ProcessManager):
             else:
                 self.process_worker_msg(msg)
 
-            if not workers:
+            if num_active_workers == 0:
                 print('finished running manager')
                 break
 
@@ -351,8 +352,8 @@ if __name__ == '__main__':
     import time
     MPI.Init()
     print("setting up logger")
-    setup_logger(screen=True, file_name='neurokernel.log',
-            mpi_comm=MPI.COMM_WORLD, multiline=True)
+    #setup_logger(screen=True, file_name='neurokernel.log',
+    #        mpi_comm=MPI.COMM_WORLD, multiline=True)
 
     # Define a class whose constructor takes arguments so as to test
     # instantiation of the class by the manager:
