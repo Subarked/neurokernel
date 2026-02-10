@@ -25,7 +25,7 @@ from .ctx_managers import IgnoreKeyboardInterrupt, OnKeyboardInterrupt, \
     ExceptionOnSignal, TryExceptionOnSignal
 from .mixins import LoggerMixin
 from .worker import Worker
-from .manager import Manager
+from .manager import WorkerManager
 from .tools.gpu import bufint, set_by_inds, set_by_inds_from_inds
 from .tools.logging import setup_logger
 from .tools.misc import catch_exception, dtype_to_mpi, renumber_in_order, LPUExecutionError

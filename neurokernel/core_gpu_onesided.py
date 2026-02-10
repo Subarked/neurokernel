@@ -16,7 +16,8 @@ from . import base_gpu_onesided
 # from ctx_managers import (IgnoreKeyboardInterrupt, OnKeyboardInterrupt,
 #                           ExceptionOnSignal, TryExceptionOnSignal)
 from .mixins import LoggerMixin
-from . import mpi
+from .worker import Worker
+from .manager import WorkerManager
 from .tools.mpi import MPIOutput
 from .tools.gpu import bufint, set_by_inds_from_inds
 from .tools.logging import setup_logger

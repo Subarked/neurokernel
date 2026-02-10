@@ -12,7 +12,7 @@ import pycuda.gpuarray as gpuarray
 from neurokernel.pattern import Pattern
 from neurokernel.plsel import Selector, SelectorMethods
 from neurokernel.core_gpu import Module, Manager, CTRL_TAG, GPOT_TAG, SPIKE_TAG
-import neurokernel.mpi as mpi
+import neurokernel.manager as mpi
 from neurokernel.mpi_run import mpi_run,mpi_run_manager
 
 import warnings
